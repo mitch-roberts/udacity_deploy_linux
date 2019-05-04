@@ -6,13 +6,12 @@
 OTR (also known as the Golden Age of Radio) typically refers to scripted radio programs which aired from the early 1920s through the early 1950s when television replaced radio as the dominant broadcast medium. Since this definition is considered by some to be overly strict and as such is controversial, this application will accept information about radio programs which aired between 1920 until 1980. 
 
 ### To run the application:
-1. Install Vagrant and VirtualBox
-2. Clone the fullstack-nanodegree-vm
-3. Launch the Vagrant VM (vagrant up) and SSH into the shell (vagrant ssh)
-4. Clone or download the project (URL HERE!!!!!!!!!!!!!!!).
-2. Navigate to the catalog directory within the project.
-3. Run application.py to start the web server (i.e., "python application.py").
-4. Navigate to "http://localhost:5000/" in a browser.
+1. Install Vagrant and VirtualBox.
+2. Clone the fullstack-nanodegree-vm.
+3. Launch the Vagrant VM (vagrant up) and SSH into the shell (vagrant ssh).
+4. Download the project from GitHub (https://github.com/mitch-roberts/udacity_catalog_proj.git) and place code in the "vagrant" directory.
+5. Run application.py to start the web server (i.e., "python application.py").
+6. Navigate to "http://localhost:5000/" in a browser.
 
 Note: The SQLite database file ("otrCatalog.db") contains some basic initial content. To begin with an empty database, stop the web server, delete otrCatalog.db and then run "models.py" (i.e., "python models.py").
 
