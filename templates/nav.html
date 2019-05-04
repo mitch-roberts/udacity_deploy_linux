@@ -1,0 +1,19 @@
+<h1>Genres</h1>
+
+{% if genres|count > 0 %}	
+
+	<ul>
+	{% for g in genres %}
+	<li {% if genre and genre.id == g.id %}class="selected"{% endif %}><a href='{{url_for("showGenre", genre_id=g.id)}}'>{{g.name}}</a></li>
+	{% endfor %}
+	</ul>
+
+{% else %}
+
+	<p>There are no genres currently defined.</p>
+
+{% endif %}
+
+{% if request.path != '/genre/add' %}
+	<p><a href='{{url_for("addGenre")}}'>Add a genre</a></p>
+{% endif %}		

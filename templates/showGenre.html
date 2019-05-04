@@ -1,0 +1,54 @@
+{% extends "main.html" %}
+
+{% block content %}
+
+<h1>{{genre.name}} Programs ({{programs|count}})</h1>
+
+{% if programs|count > 0 %}	
+	<ul>
+	{% for program in programs %}
+		<li>
+			<a href='{{url_for("showProgram", genre_id=genre.id, program_id=program.id)}}'>
+			{{program.name}} ({{program.yearBegan}}-{{program.yearEnded}})
+			</a>
+		</li>
+	{% endfor %}
+	</ul>
+	
+	<hr>
+	
+{% else %}
+	<p><em>There are currently no programs in this genre.</em></p>
+	
+	<hr>
+	
+	{% if genre.user_id == session['user_id'] %}	
+	<p>
+		<a href='{{url_for("deleteGenre", genre_id=genre.id)}}'>
+		Delete genre
+		</a>
+	</p>
+	{% endif %}
+{% endif %}
+
+<p>
+	<a href='{{url_for("addProgram", genre_id=genre.id)}}'>
+	Add a program
+	</a>
+</p>
+
+{% if genre.user_id == session['user_id'] %}	
+<p>
+	<a href='{{url_for("editGenre", genre_id=genre.id)}}'>
+	Edit genre name
+	</a>
+</p>
+{% endif %}
+
+<p>
+	<a href='{{url_for("latestPrograms")}}'>
+	Recently added programs
+	</a>
+</p>
+
+{% endblock %}

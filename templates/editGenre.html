@@ -1,0 +1,28 @@
+{% extends "main.html" %}
+
+{% block content %}
+
+<h1>Edit Genre: {{genre.name}}</h1>
+
+<form id="editGenreForm" action="#" method="POST">
+	<div class="form-row">
+	<label for="name">Name:</label>
+	<input type="text" maxlength="100" id="name" name="name" value="{{genre.name}}">
+	</div>
+
+	<button type="submit" id="submit">Edit</button>
+	<a href='{{url_for("showGenre", genre_id=genre.id)}}'><button type="button">Cancel</button></a>
+</form>
+
+<script>
+$( "#editGenreForm" ).validate({
+  rules: {
+    name: {
+      required: true,
+	  maxlength: 100
+    }
+  }
+});
+</script>
+
+{% endblock %}

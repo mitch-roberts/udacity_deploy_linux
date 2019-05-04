@@ -1,0 +1,28 @@
+{% extends "main.html" %}
+
+{% block content %}
+
+<h1>Add a Genre</h1>
+
+<form id="addGenreForm" action="#" method = "POST">
+	<div class="form-row">
+	<label for="name">Name:</label>
+	<input type ="text" maxlength="100" id="name" name="name">
+	</div>
+
+	<button type="submit" id="submit">Add</button>
+	<a href='{{url_for("latestPrograms")}}'><button type="button">Cancel</button></a>
+</form>
+
+<script>
+$( "#addGenreForm" ).validate({
+  rules: {
+    name: {
+      required: true,
+	  maxlength: 100
+    }
+  }
+});
+</script>
+
+{% endblock %}

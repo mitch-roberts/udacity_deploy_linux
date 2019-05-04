@@ -1,0 +1,123 @@
+from sqlalchemy import (Column, Integer, String, DateTime, ForeignKey,
+                        create_engine, func)
+from sqlalchemy.ext.declarative import declarative_base
+from sqlalchemy.orm import relationship, sessionmaker, validates
+import random
+import string
+import datetime
+from validation_routines import strIsInt, strLenValid, strIntValid
+
+Base = declarative_base()
+secret_key = ''.join(random.choice(string.ascii_uppercase + string.digits
+                                   ) for x in range(32))
+
+
+# Table for storing application user records.
+class User(Base):
+    __tablename__ = 'user'
+    id = Column(Integer, primary_key=True)
+    username = Column(String(32), nullable=False, index=True)
+    picture = Column(String)
+    email = Column(String, unique=True, nullable=False, index=True)
+    time_created = Column(DateTime(timezone=True), server_default=func.now())
+    time_updated = Column(DateTime(timezone=True), onupdate=func.now())
+
+    @property
+    def serialize(self):
+        """Return object data in easily serializeable format"""
+        return {
+            'username': self.username,
+            'id': self.id,
+            'picture': self.picture,
+            'email': self.email
+        }
+
+
+# Table for storing information about Old Time Radio genres or categories
+# (e.g., Comedy, Western, etc.) entered by users.
+class Genre(Base):
+    __tablename__ = 'genre'
+    id = Column(Integer, primary_key=True)
+    name = Column(String(100), nullable=False, unique=True)
+    user_id = Column(Integer, ForeignKey('user.id'))
+    user = relationship(User)
+    time_created = Column(DateTime(timezone=True), server_default=func.now())
+    time_updated = Column(DateTime(timezone=True), onupdate=func.now())
+
+    @validates('name')
+    def validate_name(self, key, name):
+        name = name.strip()
+        if not name or name == '':
+            raise AssertionError('Genre name missing.')
+        if not strLenValid(name, 1, 100):
+            raise AssertionError('Genre name must be between 1 and 100 \
+                                 characters in length.')
+        return name
+
+    @property
+    def serialize(self):
+        """Return object data in easily serializeable format"""
+        return {
+            'name': self.name,
+            'id': self.id
+        }
+
+
+# Table for storing information about specific Old Time Radio programs entered
+# by users.
+class Program(Base):
+    __tablename__ = 'program'
+    name = Column(String(120), nullable=False, unique=True)
+    id = Column(Integer, primary_key=True)
+    description = Column(String(1000))
+    yearBegan = Column(Integer, nullable=False)
+    yearEnded = Column(Integer, nullable=False)
+    genre_id = Column(Integer, ForeignKey('genre.id'))
+    genre = relationship(Genre)
+    user_id = Column(Integer, ForeignKey('user.id'))
+    user = relationship(User)
+    time_created = Column(DateTime(timezone=True), server_default=func.now())
+    time_updated = Column(DateTime(timezone=True), onupdate=func.now())
+
+    @validates('name')
+    def validate_name(self, key, name):
+        name = name.strip()
+        if not name or name == '':
+            raise AssertionError('Program name missing.')
+        if not strLenValid(name, 1, 120):
+            raise AssertionError('Program name must be between 1 and 120 \
+                                 characters in length.')
+        return name
+
+    # The following method validates both yearBegan and yearEnded fields,
+    # applying the same requirements except in the case of yearEnded, which
+    # adds logic to ensure yearEnded is greater than or equal to yearBegan.
+    @validates('yearBegan', 'yearEnded')
+    def validate_yearEndedGTEyearBegan(self, key, value):
+        value = value.strip()
+        if not value or value == '':
+            raise AssertionError('{} missing.'.format(key))
+        if not strIsInt(value) or not strIntValid(value, 1920, 1980):
+            raise AssertionError('{} must be an integer year between 1920 \
+                                 and 1980.'.format(key))
+        if key == 'yearEnded' and not self.yearBegan <= value:
+            raise AssertionError('yearEnded must be greater than or equal \
+                                 to yearBegan.')
+        return value
+
+    @property
+    def serialize(self):
+        """Return object data in easily serializeable format"""
+        return {
+            'name': self.name,
+            'description': self.description,
+            'id': self.id,
+            'yearBegan': self.yearBegan,
+            'yearEnded': self.yearEnded,
+            'genre_id': self.genre_id
+        }
+
+
+engine = create_engine('sqlite:///otrCatalog.db')
+
+Base.metadata.create_all(engine)

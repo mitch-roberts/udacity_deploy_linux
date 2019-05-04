@@ -1,0 +1,69 @@
+{% extends "main.html" %}
+
+{% block content %}
+
+<h1>Add New Program to {{genre.name}}</h1>
+
+<form id="addProgramForm" action="#" method = "POST">
+	<div class="form-row">
+	<label for="name">Program Name:</label>
+	<input type ="text" maxlength="100" id="name" name="name">
+	</div>
+	
+	<div class="form-row">
+	<label for="yearBegan">Year Began:</label>
+	<input type ="text" maxlength="4" id="yearBegan" name="yearBegan">
+	</div>
+
+	<div class="form-row">
+	<label for="yearEnded">Year Ended:</label>
+	<input type ="text" maxlength="4" id="yearEnded" name="yearEnded">
+	</div>
+
+	<div class="form-row">
+	<label for="description">Program Description:</label>
+	<textarea maxlength="1000" rows="5" id="description" name="description"></textarea>
+	</div>
+
+	<button type="submit" id="submit">Save</button>
+	<a href='{{url_for("showGenre", genre_id=genre.id)}}'><button type="button">Cancel</button></a>
+</form>
+
+<script>
+$.validator.addMethod( "greaterThanEqual", function( value, element, param ) {
+    var target = $( param );
+
+    if ( this.settings.onfocusout && target.not( ".validate-greaterThanEqual-blur" ).length ) {
+        target.addClass( "validate-greaterThanEqual-blur" ).on( "blur.validate-greaterThanEqual", function() {
+            $( element ).valid();
+        } );
+    }
+	//alert(target.val());
+    return value >= target.val();
+}, "Please enter a year that is the same or later than \"Year Began\"." );
+</script>
+
+<script>
+$( "#addProgramForm" ).validate({
+  rules: {
+    name: {
+      required: true,
+	  maxlength: 100
+    },
+    yearBegan: {
+      required: true,
+	  range: [1920, 1980]
+    },
+    yearEnded: {
+      required: true,
+	  range: [1920, 1980],
+	  greaterThanEqual: "#yearBegan"
+    },
+	description: {
+	  maxlength: 1000
+    }
+  }
+});
+</script>
+
+{% endblock %}

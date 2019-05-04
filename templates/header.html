@@ -1,0 +1,31 @@
+<!--Graphical website banner-->
+<div id="banner" style="background-image: url('{{ url_for('static', filename='images/bg10.png')}}')">
+<a href="/">
+  <img src="{{ url_for('static', filename = 'images/OTR_banner_image.png') }}" alt="OTR Program Catalog" style="width:544px;height:152px;border:0;">
+</a>
+</div>
+
+
+<!--Header row with log in/out links -->
+<div id="headerInfo">
+{% if 'user_name' not in session %}
+To add or modify information, please <a href="{{url_for('login',target_path=request.path)}}"><b>Log In</b></a>.
+{% else %}
+You are logged in as {{ session['email'] }}. <a href="{{url_for('disconnect')}}">Log Out</a>
+{% endif %}
+</div>
+
+
+<!--Block element row to be created only if flash message(s) exist -->
+{% with messages = get_flashed_messages() %}
+	{% if messages %}
+	<div id="flash">
+		<!-- Show flashed messages -->
+		<em>
+		{% for message in messages %}
+		{{ message }}<br/>
+		{% endfor %}
+		</em>
+	</div>
+	{% endif %}
+{% endwith %}

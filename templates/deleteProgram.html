@@ -1,0 +1,14 @@
+{% extends "main.html" %}
+
+{% block content %}
+
+<h1>Delete Program "{{program.name}}" from "{{genre.name}}"?</h1>
+
+<p>Are you sure?</p>
+
+<form action="#" method = 'POST'>
+	<button type="submit" id="submit" type="submit">Delete</button>
+	<a href='{{url_for("showProgram", genre_id=genre.id, program_id=program.id)}}'><button type="button">Cancel</button></a>
+</form>
+
+{% endblock %}

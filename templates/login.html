@@ -1,0 +1,71 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<!--LOAD PRE-REQUISITES FOR GOOGLE SIGN IN -->
+	<!--App uses Google Sign-In for server-side apps: https://developers.google.com/identity/sign-in/web/server-side-flow -->
+	<script src="//ajax.googleapis.com/ajax/libs/jquery/1.8.2/jquery.min.js"></script>
+	<script src="https://apis.google.com/js/client:platform.js?onload=start" async defer></script>
+
+	<script>
+	function start() {
+	  gapi.load('auth2', function() {
+		auth2 = gapi.auth2.init({
+		  client_id: '500163891806-f1oon113pka5qk2p7qgkn6ba0dvnl677.apps.googleusercontent.com',
+		});
+	  });
+	}
+	</script>
+<!-- END PRE-REQUISITES FOR GOOGLE SIGN IN -->
+	<style>
+	body {
+		font-family: Arial;
+	}
+	</style>
+</head>
+
+<body>
+
+<p id="signInMsg">Please click the button below to sign into the application using your Google account.</p>
+
+<button id="signinButton">Sign in with Google</button>
+
+<div id="result"></div>
+
+<script>
+  $('#signinButton').click(function() {
+    auth2.grantOfflineAccess().then(signInCallback);
+  });
+</script>
+
+
+<script>
+function signInCallback(authResult){
+  if (authResult['code']){
+	$('#signinButton').attr('style', 'display: none');
+	$('#signInMsg').attr('style', 'display: none');
+	$.ajax({
+	  type: 'POST',
+	  url: '/gconnect?state={{STATE}}',
+	  headers: {'X-Requested-With': 'XMLHttpRequest'},
+	  contentType: 'application/octet-stream; charset=utf-8',
+	  success:function(result){
+		$('#result').html('Login successful...</br>'+ result.msg + '</br>Redirecting...')
+			 setTimeout(function() {
+			 window.location.href = result.dest;
+			 }, 4000);
+	    },
+	  fail:function(){
+		$('#result').html('Login Failed!')
+	    },
+	  processData:false,
+	  data:authResult['code']
+	});
+  } else{
+	// handle error
+	console.log('There was an error: ' + authResult['error']);
+	$('#result').html('Failed to make a server-side call. Check your configuration and console.');
+  }
+}
+</script>
+</body>
+</html>

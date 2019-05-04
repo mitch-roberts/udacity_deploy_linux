@@ -1,0 +1,22 @@
+{% extends "main.html" %}
+
+{% block content %}
+
+<h1>Recently Added Programs</h1>
+
+{% if latest_progs.count() > 0 %}
+	<ul>
+		{% for program in latest_progs %}
+		<li>
+			<a href='{{url_for("showProgram", genre_id=program.genre_id, program_id=program.id)}}'>
+			{{ program[3] }}
+			</a> ({{ program[4] }}) -
+			<em>Added {{ program.time_created.strftime('%Y-%m-%d %I:%M %p UTC') }}</em>
+		</li>
+		{% endfor %}
+	</ul>
+{% else %}
+	<p><em>There are currently no programs in the catalog.<em></p>
+{% endif %}
+
+{% endblock %}

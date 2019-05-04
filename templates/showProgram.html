@@ -1,0 +1,44 @@
+{% extends "main.html" %}
+
+{% block content %}
+
+<h1>Program: {{program.name}}</h1>
+
+<p><strong>Year Began</strong>: {{program.yearBegan}}</p>
+<p><strong>Year Ended</strong>: {{program.yearEnded}}</p>
+
+<p><strong>Genre</strong>: {{genre.name}}</p>
+
+<p><strong>Description</strong>:</p>
+<p class="description">{{program.description}}</p>
+
+<hr>
+
+{% if program.user_id == session['user_id'] %}	
+<p>
+	<a href='{{url_for("editProgram", genre_id=genre.id, program_id=program.id)}}'>
+	Edit program
+	</a>
+</p>
+
+<p>
+	<a href='{{url_for("deleteProgram", genre_id=genre.id, program_id=program.id)}}'>
+	Delete program
+	</a>
+</p>
+{% endif %}
+
+<p>
+	<a href='{{url_for("showGenre", genre_id=genre.id)}}'>
+	Show genre: {{genre.name}}
+	</a>
+</p>
+
+<p>
+	<a href='{{url_for("latestPrograms")}}'>
+	Recently added programs
+	</a>
+</p>
+
+
+{% endblock %}
