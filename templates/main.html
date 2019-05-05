@@ -10,29 +10,31 @@
 	<link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
 </head>
 <body>
-	<header>
-		<!-- Show log in/out links and flashed messages. -->
-		{% include "header.html" %}
-	</header>
-	
-	<div class="container">
-
-		<nav>
-			<!-- Genre navigation -->
-			{% include "nav.html" %}
-		</nav>
-
-		<section>
-			<!-- Main content -->
-			{% block content %}
-			{% endblock %}
-		</section>
+	<div class="main">
+		<header>
+			<!-- Show log in/out links and flashed messages. -->
+			{% include "header.html" %}
+		</header>
 		
-	</div>
+		<div class="container">
 
-	<footer>
-		<!-- Show session vars -->
-		{% include "footer.html" %}
-	</footer>
+			<nav>
+				<!-- Genre navigation -->
+				{% include "nav.html" %}
+			</nav>
+
+			<section>
+				<!-- Main content -->
+				{% block content %}
+				{% endblock %}
+			</section>
+			
+		</div>
+
+		<footer>
+			<!-- Show session vars -->
+			{% include "footer.html" %}
+		</footer>
+	</div>
 </body>
 </html>

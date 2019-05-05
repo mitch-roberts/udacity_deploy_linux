@@ -2,47 +2,40 @@
   box-sizing: border-box;
 }
 
-div.container, html, body {
-	height: 100%;
+div.main, div.container, html, body {
 	margin: 0;
 	padding: 0;
 }
 
 body {
 	font-family: Arial;
-	/*display: flex;
-	flex-flow: column nowrap;*/
 }
 
+div.main{
+	display: flex;
+	min-height: 100vh;
+	flex-direction: column;
+    /*height: calc(100vh - 80px);*/
+  }
 div.container {
 	display: flex;
-	flex-flow: row wrap;
-}
-
-header { 
-	/*display: flex;
-	flex-flow: column nowrap;*/
+	flex-grow: 1;
 }
 
 header #banner { 
-	padding: 1%; 
-	/*flex: 100%; */
-	/* background-image: url('localhost:5000/static/images/bg10.png')*/
-	
+	padding: 1%;
+	background-image: url('images/bg10.png');	
 	border-bottom: 3px solid #316168;
-
 }
 
 header #headerInfo { 
 	padding: 1%; 
-	background: #ffd382; 
-	/*flex: 0 0 auto;*/
+	background: #ffd382;
 }
 
 header #flash { 
 	padding: 1%; 
-	background: #ffa600; 
-	/*flex: 0 0 auto; */
+	background: #ffa600;
 }
 
 footer {
@@ -50,7 +43,6 @@ footer {
 	background: #fff6e6;
 	border-top: 1px solid #ffd382;
 	font-size: 70%;
-	width: 100%;
 }
 
 nav {
@@ -70,7 +62,7 @@ nav > ul {
 nav > ul a {
 	display: block;
 	color: #000;
-	padding: 2% 3%;
+	padding: 1% 2%;
 	text-decoration: none;
 	margin: 1px 0px;
 	background-color: #87bec6;
@@ -139,7 +131,7 @@ p.description {
 columns stack on top of each other instead of next to each other */
 @media screen and (max-width: 700px) {
 	div.container {   
-		flex-flow: column wrap;
+		flex-direction: column;
 	}
 	
 	.form-row {
