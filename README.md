@@ -90,5 +90,18 @@ This endpoint will return a list of programs belonging to the genre specified wi
 }
 ```
 
+#### /genre/<int:genre_id>/program/<int:program_id>/JSON
+This endpoint returns data for a single program specified with "genre_id" and "program_id". For example, "/genre/1/program/13/JSON" might return the following:
+```
+{
+  "description": "The Fred Allen Show was a popular and long-running American old-time radio comedy program starring comedian Fred Allen and his wife Portland Hoffa. Over the course of the program's 17-year run, it was sponsored by Linit Bath Soaps, Hellmann's, Ipana, Sal Hepatica, Texaco and Tenderleaf Tea. The program ended in 1949 under the sponsorship of the Ford Motor Company.\r\n\r\nThe most popular period of the program was the few years of sponsorship under the Texaco Gas Company. During this time, the program was known as Texaco Star Theatre with Fred Allen. On the December 6, 1942 episode of the program, Allen premiered his first in a series of segments known as \"Allen's Alley\". The segments would have Allen strolling through an imaginary neighborhood, knocking on the \"doors\" of various neighbors, including average-American John Doe (played by John Brown), Mrs. Nussbaum (Minerva Pious), pompous poet Falstaff Openshaw (Alan Reed), Titus Moody (Parker Fennelly), and boisterous southern senator ...", 
+  "genre_id": 1, 
+  "id": 13, 
+  "name": "The Fred Allen Show", 
+  "yearBegan": 1932, 
+  "yearEnded": 1949
+}
+```
+
 ### Future Improvements
 In order to make the application more useful, I would like to allow logged-in users to add resource links for individual programs. These links would be sources of additional information, images, audio recordings, etc. The application will allow a logged-in user to add URLs for any program, not just those programs they added themselves.

@@ -447,19 +447,30 @@ def disconnect():
 
 
 # JSON endpoints to retrieve genre and program information
+# Get all genres.
 @app.route('/genres/JSON')
 def showGenresJSON():
     genres = session.query(Genre).order_by('name').all()
     return jsonify(Genres=[i.serialize for i in genres])
 
 
-# Get programs within specified genre.
+# Get all programs within specified genre.
 @app.route('/genre/<int:genre_id>/programs/JSON')
 def showGenreProgramsJSON(genre_id):
     genre = session.query(Genre).filter_by(id=genre_id).one()
     programs = session.query(Program).filter_by(genre_id=genre_id
                                                 ).order_by('name').all()
     return jsonify(Programs=[i.serialize for i in programs])
+
+
+# Get a specific program item.
+@app.route('/genre/<int:genre_id>/program/<int:program_id>/JSON')
+def showProgramJSON(genre_id, program_id):
+    genre = session.query(Genre).filter_by(id=genre_id).one()
+    program = session.query(Program).filter_by(genre_id=genre_id,
+                                               id=program_id
+                                               ).one()
+    return jsonify(program.serialize)
 
 
 if __name__ == '__main__':
