@@ -1,12 +1,17 @@
 #!/usr/bin/env python
 
-# "OTR Program Catalog" is a Flask web application with a SQLite back end
-# that provides an interface for browsing and managing a catalog of Old
-# Time Radio (OTR) genres and programs. It is written in Python 2 and
-# leverages Google oauth for user login.
+"""application.py: 'OTR Program Catalog' RESTful web application.
 
-# For additional information, please see the README file.
+'OTR Program Catalog' is a Flask web application with a SQLite back end
+that provides an interface for browsing and managing a catalog of Old
+Time Radio (OTR) genres and programs. It is written in Python 2 and
+leverages Google oauth for user login.
 
+Usage:
+    python application.py
+
+For additional information, please see the README file.
+"""
 
 from models import Base, User, Genre, Program
 from flask import (Flask, jsonify, request, redirect, url_for, abort, g,
@@ -29,7 +34,9 @@ from oauth2client.client import FlowExchangeError
 
 
 # Function to enforce foreign keys for SQLite (triggered by 'connect' event
-# handler below)
+# handler below). Taken from users 'conny' and 'CarlS' on StackOverflow
+# (https://stackoverflow.com/questions/2614984/ ...
+# sqlite-sqlalchemy-how-to-enforce-foreign-keys/7831210#7831210)
 def _fk_pragma_on_connect(dbapi_con, con_record):
     dbapi_con.execute('pragma foreign_keys=ON')
 
@@ -52,9 +59,13 @@ CLIENT_ID = json.loads(
 
 
 # ENDPOINTS
-# Application home page. Show most recent 10 programs added.
 @app.route('/')
 def latestPrograms():
+    """Show application home page.
+
+    Returns:
+        Page displaying 10 most recently added programs.
+    """
     genres = session.query(Genre).order_by('name').all()
     latest_progs = session.query(
                                  Program.id, Program.genre_id,
@@ -68,9 +79,16 @@ def latestPrograms():
     return render_template('latestPrograms.html', genres=genres,
                            latest_progs=latest_progs)
 
-# Add a genre.
+
 @app.route('/genre/add', methods=['GET', 'POST'])
 def addGenre():
+    """Add a new genre to the database.
+
+    Returns:
+        If user is not signed in, redirect to login page.
+        on GET: Page with form to add a new genre.
+        on POST: Redirect to page showing new genre after it's created.
+    """
     if 'user_name' not in login_session:
         login_session['target_path'] = request.path
         return redirect('/login')
@@ -93,10 +111,17 @@ def addGenre():
         return redirect(url_for('showGenre', genre_id=genre.id))
 
 
-# Show programs within a specified genre.
 @app.route('/genre/<int:genre_id>')
 @app.route('/genre/<int:genre_id>/program')
 def showGenre(genre_id):
+    """Show all programs within the specified genre.
+
+    Args:
+        genre_id (int): Primary key of specified genre.
+
+    Returns:
+        Page showing specified genre and all programs within it.
+    """
     genres = session.query(Genre).order_by('name').all()
     genre = session.query(Genre).filter_by(id=genre_id).one()
     programs = session.query(Program).filter_by(
@@ -105,9 +130,23 @@ def showGenre(genre_id):
     return render_template('showGenre.html', genres=genres, genre=genre,
                            programs=programs)
 
-# Delete specified genre.
+
 @app.route('/genre/<int:genre_id>/delete', methods=['GET', 'POST'])
 def deleteGenre(genre_id):
+    """Delete specified genre from database.
+
+    Args:
+        genre_id (int): Primary key of specified genre.
+
+    Returns:
+        If user is not signed in, redirect to login page.
+        If logged-in user did not create the genre, redirect to page
+            showing genre and flash error message.
+        If genre has programs associated with it, redirect to page
+            showing genre and flash error message.
+        on GET: Page with form confirming intent to delete.
+        on POST: Redirect to application home page after deletion.
+    """
     if 'user_name' not in login_session:
         login_session['target_path'] = request.path
         return redirect('/login')
@@ -131,9 +170,20 @@ def deleteGenre(genre_id):
         return redirect(url_for('latestPrograms'))
 
 
-# Edit specified genre.
 @app.route('/genre/<int:genre_id>/edit', methods=['GET', 'POST'])
 def editGenre(genre_id):
+    """Edit specified genre.
+
+    Args:
+        genre_id (int): Primary key of specified genre.
+
+    Returns:
+        If user is not signed in, redirect to login page.
+        If logged-in user did not create the genre, redirect to page
+            showing genre and flash error message.
+        on GET: Page with form for user to specify desired edits.
+        on POST: Redirect to application home page after edits.
+    """
     if 'user_name' not in login_session:
         login_session['target_path'] = request.path
         return redirect('/login')
@@ -152,9 +202,18 @@ def editGenre(genre_id):
         return redirect(url_for('latestPrograms'))
 
 
-# Add a program to specified genre.
 @app.route('/genre/<int:genre_id>/program/add', methods=['GET', 'POST'])
 def addProgram(genre_id):
+    """Add a program to specified genre.
+
+    Args:
+        genre_id (int): Primary key of specified genre.
+
+    Returns:
+        If user is not signed in, redirect to login page.
+        on GET: Page with form for user to submit new program details.
+        on POST: Redirect to read-only page showing program details.
+    """
     if 'user_name' not in login_session:
         login_session['target_path'] = request.path
         return redirect('/login')
@@ -184,10 +243,27 @@ def addProgram(genre_id):
                                 program_id=program.id))
 
 
-# Edit program.
 @app.route('/genre/<int:genre_id>/program/<int:program_id>/edit',
            methods=['GET', 'POST'])
 def editProgram(genre_id, program_id):
+    """Edit details of specified program.
+
+    Args:
+        genre_id (int): Primary key of specified genre.
+        program_id (int): Primary key of specified program.
+
+    Returns:
+        If user is not signed in, redirect to login page.
+        If logged-in user did not create the program, redirect to page
+            showing program and flash error message.
+        on GET: Page with form for user to specify desired edits.
+        on POST:
+            If user is specifying a new program name which already
+                exists within the genre, redirect to edit page and
+                flash error message.
+            Otherwise, redirect to read-only page showing program
+                details.
+    """
     if 'user_name' not in login_session:
         login_session['target_path'] = request.path
         return redirect('/login')
@@ -221,10 +297,24 @@ def editProgram(genre_id, program_id):
         return redirect(url_for('showProgram', genre_id=genre_id,
                                 program_id=program_id))
 
-# Delete program.
+
 @app.route('/genre/<int:genre_id>/program/<int:program_id>/delete',
            methods=['GET', 'POST'])
 def deleteProgram(genre_id, program_id):
+    """Delete specified program from database.
+
+    Args:
+        genre_id (int): Primary key of specified genre.
+        program_id (int): Primary key of specified genre.
+
+    Returns:
+        If user is not signed in, redirect to login page.
+        If logged-in user did not create the program, redirect to page
+            showing program and flash error message.
+        on GET: Page with form confirming intent to delete.
+        on POST: Redirect to page showing genre with which deleted
+            program was associated.
+    """
     if 'user_name' not in login_session:
         login_session['target_path'] = request.path
         return redirect('/login')
@@ -244,9 +334,17 @@ def deleteProgram(genre_id, program_id):
         return redirect(url_for('showGenre', genre_id=genre_id))
 
 
-# Show program details.
 @app.route('/genre/<int:genre_id>/program/<int:program_id>/show')
 def showProgram(genre_id, program_id):
+    """Show details of specified program.
+
+    Args:
+        genre_id (int): Primary key of specified genre.
+        program_id (int): Primary key of specified program.
+
+    Returns:
+        Page showing program details.
+    """
     genres = session.query(Genre).order_by('name').all()
     genre = session.query(Genre).filter_by(id=genre_id).one()
     program = session.query(Program).filter_by(id=program_id).one()
@@ -254,9 +352,12 @@ def showProgram(genre_id, program_id):
                            program=program)
 
 
-# Display login options to user.
 @app.route('/login')
 def login():
+    """Return page presenting user with login option.
+
+    Currently, Google login is the only option available.
+    """
     # Add target_path to session (if applicable) to support redirecting to
     # user's intended destination after login is complete.
     if request.args.get('target_path') is not None:
@@ -268,9 +369,33 @@ def login():
     return render_template('login.html', STATE=state)
 
 
-# Handle Google OAuth POST from login.html.
 @app.route('/gconnect', methods=['POST'])
 def gconnect():
+    """Handle Ajax POST from Google sign-in callback in login.html.
+
+    Validates state and header info and retrieves auth code from POST.
+    Upgrades auth code to credentials object uses it to retrieve user
+    information via Google API. Updates login session and database
+    (User) table with information for logged-in user. Writes flash
+    login success message on completion.
+
+    Returns:
+        If POSTed state token does not match one in session, 401 error.
+        If request lacks `X-Requested-With` header, 403 error.
+        If FlowExchangeError or other unspecified error encountered
+            while exchanging auth code, 401 error.
+        If error is encountered accessing user account info via
+            access_token, 500 error.
+        If unable to verify that access token is for the intended user,
+            401 error.
+        If unable to verify that access token is for the intended app,
+            401 error.
+        If access token corresponds to current logged-in session user,
+            200 response.
+        Otherwise, JSON string containing login success message (msg)
+            and path (dest) representing intended post-login
+            destination page, if any.
+    """
     # Check that the state token from client matches the session version.
     if request.args.get('state') != login_session['state']:
         response = make_response(json.dumps('Invalid state parameter.'), 401)
@@ -393,9 +518,15 @@ def gconnect():
     return jsonify({'msg': msg, 'dest': dest})
 
 
-# Google provider - disconnect logged-in user.
 @app.route('/gdisconnect')
 def gdisconnect():
+    """Disconnect user logged-in with Google.
+
+    Returns:
+        If access token not in session, 401 error.
+        If disconnect successful, 200 response.
+        If disconnect unsuccessful, 400 error.
+    """
     # Only disconnect a connected user.
     access_token = login_session.get('access_token')
     if access_token is None:
@@ -420,10 +551,16 @@ def gdisconnect():
         return response
 
 
-# Disconnect user and remove related session variables. Then flash appropriate
-# message and redirect to home page.
 @app.route('/disconnect')
 def disconnect():
+    """Disconnect logged-in user and remove related session variables.
+
+    Calls provider-specific disconnect function based on provider
+    specified in login session. Adds flash message with logout status.
+
+    Returns:
+        Redirect to application home page.
+    """
     if 'provider' in login_session:
         if login_session['provider'] == 'google':
             gdisconnect()
@@ -446,26 +583,35 @@ def disconnect():
     return redirect(url_for('latestPrograms'))
 
 
-# JSON endpoints to retrieve genre and program information
-# Get all genres.
+# JSON ENDPOINTS
 @app.route('/genres/JSON')
 def showGenresJSON():
+    """Return JSON data representing all genres in the database."""
     genres = session.query(Genre).order_by('name').all()
     return jsonify(Genres=[i.serialize for i in genres])
 
 
-# Get all programs within specified genre.
 @app.route('/genre/<int:genre_id>/programs/JSON')
 def showGenreProgramsJSON(genre_id):
+    """Return JSON data representing all programs in specified genre.
+
+    Args:
+        genre_id (int): Primary key of specified genre.
+    """
     genre = session.query(Genre).filter_by(id=genre_id).one()
     programs = session.query(Program).filter_by(genre_id=genre_id
                                                 ).order_by('name').all()
     return jsonify(Programs=[i.serialize for i in programs])
 
 
-# Get a specific program item.
 @app.route('/genre/<int:genre_id>/program/<int:program_id>/JSON')
 def showProgramJSON(genre_id, program_id):
+    """Return JSON data representing a specific program item.
+
+    Args:
+        genre_id (int): Primary key of specified genre.
+        program_id (int): Primary key of specified program.
+    """
     genre = session.query(Genre).filter_by(id=genre_id).one()
     program = session.query(Program).filter_by(genre_id=genre_id,
                                                id=program_id

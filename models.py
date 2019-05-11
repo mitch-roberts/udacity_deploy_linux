@@ -1,3 +1,5 @@
+"""models.py: Creates ORM objects for 'OTR Program Catalog' app."""
+
 from sqlalchemy import (Column, Integer, String, DateTime, ForeignKey,
                         create_engine, func)
 from sqlalchemy.ext.declarative import declarative_base
@@ -12,8 +14,18 @@ secret_key = ''.join(random.choice(string.ascii_uppercase + string.digits
                                    ) for x in range(32))
 
 
-# Table for storing application user records.
 class User(Base):
+    """
+    Class for User table, which stores application user records.
+
+    Attributes:
+        id (Integer): Primary key
+        username (String): User's name
+        picture (String): URL pointing to user's picture
+        email (String): User's email address
+        time_created (DateTime): Record creation timestamp
+        time_updated (DateTime): Record update timestamp
+    """
     __tablename__ = 'user'
     id = Column(Integer, primary_key=True)
     username = Column(String(32), nullable=False, index=True)
@@ -33,9 +45,22 @@ class User(Base):
         }
 
 
-# Table for storing information about Old Time Radio genres or categories
-# (e.g., Comedy, Western, etc.) entered by users.
 class Genre(Base):
+    """
+    Class for Genre table which stores the app's genre records.
+
+    Genre records contain information about Old Time Radio genres or
+    categories (e.g., Comedy, Western, etc.) entered by users.
+
+    Attributes:
+        id (Integer): Primary key
+        name (String): Genre name (e.g., Comedy)
+        user_id (Integer): Id of user who added the genre
+            (Foreign key pointing to "id" field in User table)
+        user (Relationship): Link to User class
+        time_created (DateTime): Record creation timestamp
+        time_updated (DateTime): Record update timestamp
+    """
     __tablename__ = 'genre'
     id = Column(Integer, primary_key=True)
     name = Column(String(100), nullable=False, unique=True)
@@ -46,6 +71,7 @@ class Genre(Base):
 
     @validates('name')
     def validate_name(self, key, name):
+        """Validator routine for genre 'name' field."""
         name = name.strip()
         if not name or name == '':
             raise AssertionError('Genre name missing.')
@@ -63,9 +89,28 @@ class Genre(Base):
         }
 
 
-# Table for storing information about specific Old Time Radio programs entered
-# by users.
 class Program(Base):
+    """
+    Class for Program table which stores the app's program records.
+
+    Program records contain information about specific Old Time Radio
+    programs entered by users.
+
+    Attributes:
+        id (Integer): Primary key
+        name (String): Program name (e.g., The Lone Ranger)
+        description (String): Description of program
+        yearBegan (Integer): Year the program was first broadcast
+        yearEnded (Integer): Year the program was last broadcast
+        genre_id (Integer): Id of genre to which program belongs
+            (Foreign key pointing to "id" field in Genre table)
+        genre (relationship): Link to Genre class
+        user_id (Integer): Id of user who added the program
+            (Foreign key pointing to "id" field in User table)
+        user (Relationship): Link to User class
+        time_created (DateTime): Record creation timestamp
+        time_updated (DateTime): Record update timestamp
+    """
     __tablename__ = 'program'
     name = Column(String(120), nullable=False, unique=True)
     id = Column(Integer, primary_key=True)
@@ -81,6 +126,7 @@ class Program(Base):
 
     @validates('name')
     def validate_name(self, key, name):
+        """Validator routine for program 'name' field."""
         name = name.strip()
         if not name or name == '':
             raise AssertionError('Program name missing.')
@@ -94,6 +140,7 @@ class Program(Base):
     # adds logic to ensure yearEnded is greater than or equal to yearBegan.
     @validates('yearBegan', 'yearEnded')
     def validate_yearEndedGTEyearBegan(self, key, value):
+        """Validator routine for 'yearBegan' and 'yearEnded' fields."""
         value = value.strip()
         if not value or value == '':
             raise AssertionError('{} missing.'.format(key))
