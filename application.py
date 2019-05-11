@@ -190,7 +190,8 @@ def editGenre(genre_id):
     genre = session.query(Genre).filter_by(id=genre_id).one()
     if genre.user_id != login_session['user_id']:
         flash('You may not edit a genre which you did not create.')
-        return redirect(request.path)
+        return redirect("/genre/%s" % genre_id)
+        # return redirect(request.path)
     if request.method == 'GET':
         genres = session.query(Genre).order_by('name').all()
         return render_template('editGenre.html', genres=genres, genre=genre)
