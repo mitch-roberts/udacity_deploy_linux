@@ -272,7 +272,8 @@ def editProgram(genre_id, program_id):
     program = session.query(Program).filter_by(id=program_id).one()
     if program.user_id != login_session['user_id']:
         flash('You may not edit a program which you did not create.')
-        return redirect(request.path)
+        return redirect(url_for('showProgram', genre_id=genre_id,
+                                program_id=program.id))
     if request.method == 'GET':
         genres = session.query(Genre).order_by('name').all()
         return render_template('editProgram.html', genres=genres, genre=genre,
