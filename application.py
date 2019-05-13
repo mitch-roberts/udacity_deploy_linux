@@ -201,6 +201,9 @@ def editGenre(genre_id):
         If user is not signed in, redirect to login page.
         If logged-in user did not create the genre, redirect to page
             showing genre and flash error message.
+        If user attempts to change the genre name to one that already
+            exists, redirect back to genre edit page and flash error
+            message.
         on GET: Page with form for user to specify desired edits.
         on POST: Redirect to application home page after edits.
     """
@@ -208,12 +211,15 @@ def editGenre(genre_id):
     if genre.user_id != login_session['user_id']:
         flash('You may not edit a genre which you did not create.')
         return redirect("/genre/%s" % genre_id)
-        # return redirect(request.path)
     if request.method == 'GET':
         genres = session.query(Genre).order_by('name').all()
         return render_template('editGenre.html', genres=genres, genre=genre)
     elif request.method == 'POST':
         name = request.form.get('name')
+        numThisGenre = session.query(Genre).filter_by(name=name).count()
+        if numThisGenre > 0:
+            flash('The genre name you specified already exists.')
+            return redirect(url_for("editGenre", genre_id=genre.id))
         genre.name = name
         session.commit()
         flash("Genre \"%s\" updated." % genre.name)
