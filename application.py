@@ -17,6 +17,7 @@ from models import Base, User, Genre, Program
 from flask import (Flask, jsonify, request, redirect, url_for, abort, g,
                    render_template, flash, make_response,
                    session as login_session)
+from functools import wraps
 from flask_httpauth import HTTPBasicAuth
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.orm import relationship, sessionmaker, validates
@@ -58,6 +59,28 @@ CLIENT_ID = json.loads(
                       )['web']['client_id']
 
 
+# Create decorator to ensure that user is logged in before executing
+# decorated function.
+def login_required(f):
+    """Require user to be logged in before executing wrapped function.
+
+    Before redirecting user to login page, save requested path (if any)
+    in session so that user can be redirected after login is complete.
+
+    Returns:
+        If user is already logged in, executed function return result;
+        Otherwise, redirect to user login page.
+    """
+    @wraps(f)
+    def decorated_function(*args, **kwargs):
+        if 'user_name' in login_session:
+            return f(*args, **kwargs)
+        else:
+            login_session['target_path'] = request.path
+            return redirect('/login')
+    return decorated_function
+
+
 # ENDPOINTS
 @app.route('/')
 def latestPrograms():
@@ -81,6 +104,7 @@ def latestPrograms():
 
 
 @app.route('/genre/add', methods=['GET', 'POST'])
+@login_required
 def addGenre():
     """Add a new genre to the database.
 
@@ -89,9 +113,6 @@ def addGenre():
         on GET: Page with form to add a new genre.
         on POST: Redirect to page showing new genre after it's created.
     """
-    if 'user_name' not in login_session:
-        login_session['target_path'] = request.path
-        return redirect('/login')
     if request.method == 'GET':
         genres = session.query(Genre).order_by('name').all()
         return render_template('addGenre.html', genres=genres)
@@ -132,6 +153,7 @@ def showGenre(genre_id):
 
 
 @app.route('/genre/<int:genre_id>/delete', methods=['GET', 'POST'])
+@login_required
 def deleteGenre(genre_id):
     """Delete specified genre from database.
 
@@ -147,9 +169,6 @@ def deleteGenre(genre_id):
         on GET: Page with form confirming intent to delete.
         on POST: Redirect to application home page after deletion.
     """
-    if 'user_name' not in login_session:
-        login_session['target_path'] = request.path
-        return redirect('/login')
     genre = session.query(Genre).filter_by(id=genre_id).one()
     if genre.user_id != login_session['user_id']:
         flash('You may not delete a genre which you did not create.')
@@ -171,6 +190,7 @@ def deleteGenre(genre_id):
 
 
 @app.route('/genre/<int:genre_id>/edit', methods=['GET', 'POST'])
+@login_required
 def editGenre(genre_id):
     """Edit specified genre.
 
@@ -184,9 +204,6 @@ def editGenre(genre_id):
         on GET: Page with form for user to specify desired edits.
         on POST: Redirect to application home page after edits.
     """
-    if 'user_name' not in login_session:
-        login_session['target_path'] = request.path
-        return redirect('/login')
     genre = session.query(Genre).filter_by(id=genre_id).one()
     if genre.user_id != login_session['user_id']:
         flash('You may not edit a genre which you did not create.')
@@ -204,6 +221,7 @@ def editGenre(genre_id):
 
 
 @app.route('/genre/<int:genre_id>/program/add', methods=['GET', 'POST'])
+@login_required
 def addProgram(genre_id):
     """Add a program to specified genre.
 
@@ -215,9 +233,6 @@ def addProgram(genre_id):
         on GET: Page with form for user to submit new program details.
         on POST: Redirect to read-only page showing program details.
     """
-    if 'user_name' not in login_session:
-        login_session['target_path'] = request.path
-        return redirect('/login')
     if request.method == 'GET':
         genres = session.query(Genre).order_by('name').all()
         genre = session.query(Genre).filter_by(id=genre_id).one()
@@ -246,6 +261,7 @@ def addProgram(genre_id):
 
 @app.route('/genre/<int:genre_id>/program/<int:program_id>/edit',
            methods=['GET', 'POST'])
+@login_required
 def editProgram(genre_id, program_id):
     """Edit details of specified program.
 
@@ -265,9 +281,6 @@ def editProgram(genre_id, program_id):
             Otherwise, redirect to read-only page showing program
                 details.
     """
-    if 'user_name' not in login_session:
-        login_session['target_path'] = request.path
-        return redirect('/login')
     genre = session.query(Genre).filter_by(id=genre_id).one()
     program = session.query(Program).filter_by(id=program_id).one()
     if program.user_id != login_session['user_id']:
@@ -302,6 +315,7 @@ def editProgram(genre_id, program_id):
 
 @app.route('/genre/<int:genre_id>/program/<int:program_id>/delete',
            methods=['GET', 'POST'])
+@login_required
 def deleteProgram(genre_id, program_id):
     """Delete specified program from database.
 
@@ -317,9 +331,6 @@ def deleteProgram(genre_id, program_id):
         on POST: Redirect to page showing genre with which deleted
             program was associated.
     """
-    if 'user_name' not in login_session:
-        login_session['target_path'] = request.path
-        return redirect('/login')
     genre = session.query(Genre).filter_by(id=genre_id).one()
     program = session.query(Program).filter_by(id=program_id).one()
     if program.user_id != login_session['user_id']:
