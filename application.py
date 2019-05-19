@@ -29,9 +29,17 @@ import json
 import sys
 import random
 import string
+import os
 
 from oauth2client.client import flow_from_clientsecrets
 from oauth2client.client import FlowExchangeError
+
+import logging
+
+logging.basicConfig(level=logging.DEBUG,
+                    format='%(asctime)s %(levelname)s %(message)s',
+                    filename='/tmp/otrcatalog.log',
+                    filemode='w')
 
 
 # Function to enforce foreign keys for SQLite (triggered by 'connect' event
@@ -46,6 +54,9 @@ def _fk_pragma_on_connect(dbapi_con, con_record):
 engine = create_engine('sqlite:///otrCatalog.db',
                        connect_args={'check_same_thread': False})
 event.listen(engine, 'connect', _fk_pragma_on_connect)
+dbURL = 'postgresql://otrcatalogrole:otrcatalogrole@localhost:5432/otrcatalog'
+engine = create_engine(dbURL)
+
 Base.metadata.bind = engine
 DBSession = sessionmaker(bind=engine)
 session = DBSession()
@@ -54,8 +65,12 @@ session = DBSession()
 app = Flask(__name__)
 
 # Retrieve client id from client_secrets file.
+CLIENT_SECRETS_PATH = os.path.join(
+                                   os.path.dirname(__file__),
+                                   'client_secrets.json'
+                                  )
 CLIENT_ID = json.loads(
-                       open('client_secrets.json', 'r').read()
+                       open(CLIENT_SECRETS_PATH, 'r').read()
                       )['web']['client_id']
 
 
@@ -433,7 +448,7 @@ def gconnect():
     try:
         # Upgrade the authorization code into a credentials object.
         print "Attempting to get credentials..."
-        oauth_flow = flow_from_clientsecrets('client_secrets.json',
+        oauth_flow = flow_from_clientsecrets(CLIENT_SECRETS_PATH,
                                              scope='',
                                              redirect_uri='postmessage')
         credentials = oauth_flow.step2_exchange(auth_code)

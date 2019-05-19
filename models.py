@@ -165,6 +165,6 @@ class Program(Base):
         }
 
 
-engine = create_engine('sqlite:///otrCatalog.db')
-
+dbURL = 'postgresql://otrcatalogrole:otrcatalogrole@localhost:5432/otrcatalog'
+engine = create_engine(dbURL)
 Base.metadata.create_all(engine)
