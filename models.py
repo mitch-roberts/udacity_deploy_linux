@@ -8,6 +8,7 @@ import random
 import string
 import datetime
 from validation_routines import strIsInt, strLenValid, strIntValid
+from db_creds import db_creds
 
 Base = declarative_base()
 secret_key = ''.join(random.choice(string.ascii_uppercase + string.digits
@@ -165,6 +166,13 @@ class Program(Base):
         }
 
 
-dbURL = 'postgresql://otrcatalogrole:otrcatalogrole@localhost:5432/otrcatalog'
+# Connect to Database and create database session.
+dbURL = "{}://{}:{}@{}:{}/{}".format(
+                                     db_creds['driver'],
+                                     db_creds['user'],
+                                     db_creds['passwd'],
+                                     db_creds['host'],
+                                     db_creds['port'],
+                                     db_creds['database'])
 engine = create_engine(dbURL)
 Base.metadata.create_all(engine)

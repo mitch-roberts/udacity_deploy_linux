@@ -14,6 +14,7 @@ For additional information, please see the README file.
 """
 
 from models import Base, User, Genre, Program
+from db_creds import db_creds
 from flask import (Flask, jsonify, request, redirect, url_for, abort, g,
                    render_template, flash, make_response,
                    session as login_session)
@@ -34,27 +35,15 @@ import os
 from oauth2client.client import flow_from_clientsecrets
 from oauth2client.client import FlowExchangeError
 
-import logging
-
-logging.basicConfig(level=logging.DEBUG,
-                    format='%(asctime)s %(levelname)s %(message)s',
-                    filename='/tmp/otrcatalog.log',
-                    filemode='w')
-
-
-# Function to enforce foreign keys for SQLite (triggered by 'connect' event
-# handler below). Taken from users 'conny' and 'CarlS' on StackOverflow
-# (https://stackoverflow.com/questions/2614984/ ...
-# sqlite-sqlalchemy-how-to-enforce-foreign-keys/7831210#7831210)
-def _fk_pragma_on_connect(dbapi_con, con_record):
-    dbapi_con.execute('pragma foreign_keys=ON')
-
 
 # Connect to Database and create database session.
-engine = create_engine('sqlite:///otrCatalog.db',
-                       connect_args={'check_same_thread': False})
-event.listen(engine, 'connect', _fk_pragma_on_connect)
-dbURL = 'postgresql://otrcatalogrole:otrcatalogrole@localhost:5432/otrcatalog'
+dbURL = "{}://{}:{}@{}:{}/{}".format(
+                                     db_creds['driver'],
+                                     db_creds['user'],
+                                     db_creds['passwd'],
+                                     db_creds['host'],
+                                     db_creds['port'],
+                                     db_creds['database'])
 engine = create_engine(dbURL)
 
 Base.metadata.bind = engine
@@ -652,10 +641,3 @@ def showProgramJSON(genre_id, program_id):
                                                id=program_id
                                                ).one()
     return jsonify(program.serialize)
-
-
-if __name__ == '__main__':
-    app.debug = True
-    app.config['SECRET_KEY'] = ''.join(random.choice(string.ascii_uppercase +
-                                       string.digits) for x in xrange(32))
-    app.run(host='0.0.0.0', port=5000)
