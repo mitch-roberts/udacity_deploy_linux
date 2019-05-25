@@ -1,19 +1,63 @@
-# Project: Item Catalog
+# Final Project: Item Catalog
 
-"OTR Program Catalog" is a Flask web application with a SQLite back end that provides an interface for browsing and managing a catalog of Old Time Radio (OTR) genres and programs. It is written in Python 2 and leverages Google oauth for user login.
+### Deployment Details:
+
+#### IP Address: 54.213.237.120
+
+#### SSH Port: 2200
+
+#### Web Application URL: 54.213.237.120.xip.io
+
+### Software Installed:
+- apache2
+- flask
+- flask-sqlalchemy
+- httplib2
+- libapache2-mod-wsgi
+- libpq-dev
+- oauth2client
+- postgresql
+- python-psycopg2
+- requests
+- sqlalchemy
+
+### Configuration Changes
+- Add "grader" and "catalog" user accounts
+- Change SSH port from 22 to 2200
+- Add public keys to "ubuntu" and "grader" user accounts
+- Set permissions on .ssh directory (700) and authorized_keys file (644) for above users
+- Disable password-based logins for all users
+- Configure firewall to allow only tcp (port 2200), www and ntp incoming traffic and allow all outgoing traffic
+- Confirm that local timezone is set to UTC
+- In /etc/apache2/sites-enabled/000-default.conf, uncomment WSGIScriptAlias and set its value to: "/ /var/www/flaskapp/udacity_deploy_linux/otrcatalog.wsgi"
+- Note: The actual database user password and application secret key have been removed from "db_creds.py" and "otrcatalog.wsgi" files, respectively, in the GitHub repository.  
+
+### Postgresql Changes
+- Create "otrcatalog" database
+- Create "otrcatalogrole" role
+- Create "app" schema in "otrcatalog" database
+- Set search path on "otrcatalog" database to "app" schema
+- Grant the following privileges to "otrcatalogrole":
+-- Connect to "otrcatalog" database
+-- Usage and create on "app" schema
+-- Select, insert, update and delete on tables (as default)
+-- Use sequences in "app" schema
+- Create user "catalog" and grant it "otrcatalogrole" role
+- Revoke all rights to "otrcatalog" database from "public" role
+
+### Other Third-Party Resources Used (not a comprehensive list)
+- Digital Ocean community (https://www.digitalocean.com/community) (information about Apache and PSQL)
+- Amazon AWS article - https://aws.amazon.com/blogs/database/managing-postgresql-users-and-roles/ (very useful info about PSQL roles/users)
+- developers.google.com (OAuth provider for user login)
+- Stack Overflow (stackoverflow.com)
+
+
+"OTR Program Catalog" is a Flask web application with a PostgreSQL back end that provides an interface for browsing and managing a catalog of Old Time Radio (OTR) genres and programs. 
+It is written in Python 2 and leverages Google oauth for user login.
 
 ### OTR
 OTR (also known as the Golden Age of Radio) typically refers to scripted radio programs which aired from the early 1920s through the early 1950s when television replaced radio as the dominant broadcast medium. Since this definition is considered by some to be overly strict and as such is controversial, this application will accept information about radio programs which aired between 1920 until 1980. 
 
-### To run the application:
-1. Install Vagrant and VirtualBox.
-2. Clone the fullstack-nanodegree-vm.
-3. Launch the Vagrant VM (vagrant up) and SSH into the shell (vagrant ssh).
-4. Download the project from GitHub (https://github.com/mitch-roberts/udacity_catalog_proj.git) and place in a folder in the "vagrant" directory.
-5. Run application.py to start the web server (i.e., "python application.py").
-6. Navigate to "http://localhost:5000/" in a browser.
-
-Note: The SQLite database file ("otrCatalog.db") contains some basic initial content. To begin with an empty database, stop the web server, delete otrCatalog.db and then run "models.py" (i.e., "python models.py").
 
 ### Usage
 The homepage shows the 10 most recently added programs. The user may browse programs by genre using the navigation bar on the left side of the page. To get details about a program the user may click the linked program name.
