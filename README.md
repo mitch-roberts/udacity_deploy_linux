@@ -6,7 +6,7 @@
 
 #### SSH Port: 2200
 
-#### Web Application URL: 54.213.237.120.xip.io
+#### Web Application URL: http://54.213.237.120.xip.io
 
 ### Software Installed:
 - apache2
@@ -29,7 +29,7 @@
 - Disable password-based logins for all users
 - Configure firewall to allow only tcp (port 2200), www and ntp incoming traffic and allow all outgoing traffic
 - Confirm that local timezone is set to UTC
-- In /etc/apache2/sites-enabled/000-default.conf, uncomment WSGIScriptAlias and set its value to: "/ /var/www/flaskapp/udacity_deploy_linux/otrcatalog.wsgi"
+- In /etc/apache2/sites-enabled/000-default.conf, uncomment "WSGIScriptAlias" line and set its value to: "/ /var/www/flaskapp/udacity_deploy_linux/otrcatalog.wsgi"
 - Note: The actual database user password and application secret key have been removed from "db_creds.py" and "otrcatalog.wsgi" files, respectively, in the GitHub repository.  
 
 ### Postgresql Changes
@@ -38,19 +38,23 @@
 - Create "app" schema in "otrcatalog" database
 - Set search path on "otrcatalog" database to "app" schema
 - Grant the following privileges to "otrcatalogrole":
--- Connect to "otrcatalog" database
--- Usage and create on "app" schema
--- Select, insert, update and delete on tables (as default)
--- Use sequences in "app" schema
-- Create user "catalog" and grant it "otrcatalogrole" role
+    - Connect to "otrcatalog" database
+    - Usage and create on "app" schema
+    - Select, insert, update and delete on tables (as default)
+    - Use sequences in "app" schema
+- Create user "catalog" and grant it the "otrcatalogrole" role
 - Revoke all rights to "otrcatalog" database from "public" role
 
 ### Other Third-Party Resources Used (not a comprehensive list)
+- Git Bash
+- Notepad++
 - Digital Ocean community (https://www.digitalocean.com/community) (information about Apache and PSQL)
 - Amazon AWS article - https://aws.amazon.com/blogs/database/managing-postgresql-users-and-roles/ (very useful info about PSQL roles/users)
 - developers.google.com (OAuth provider for user login)
 - Stack Overflow (stackoverflow.com)
 
+
+# Other Application Details
 
 "OTR Program Catalog" is a Flask web application with a PostgreSQL back end that provides an interface for browsing and managing a catalog of Old Time Radio (OTR) genres and programs. 
 It is written in Python 2 and leverages Google oauth for user login.
